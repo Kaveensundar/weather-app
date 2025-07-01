@@ -29,7 +29,8 @@ const WeatherApp = () => {
   const [city, setCity] = useState('');
   const [weather, setWeather] = useState(null);
   const [error, setError] = useState(null);
-  const apiKey = '847c50ce76faa39c92195aa151a59730'; // move to env for production
+
+  const apiKey = '847c50ce76faa39c92195aa151a59730'; // Move to env in prod
 
   const fetchWeather = async () => {
     if (!city.trim()) return;
@@ -53,11 +54,12 @@ const WeatherApp = () => {
   };
 
   return (
-    <div className="container py-5 d-flex justify-content-center align-items-center min-vh-100 bg-light">
-      <div className="card shadow-lg p-4 w-100" style={{ maxWidth: '500px' }}>
-        <h3 className="text-center mb-4">🌤️ Weather App</h3>
+    <div className="container d-flex justify-content-center align-items-center min-vh-100 bg-light">
+      <div className="card shadow p-4 w-100" style={{ maxWidth: '500px' }}>
+        <h3 className="text-center mb-4 text-primary">🌤 Weather Forecast</h3>
 
-        <div className="input-group mb-4">
+        {/* Input Section */}
+        <div className="input-group mb-3">
           <input
             type="text"
             className="form-control"
@@ -66,47 +68,41 @@ const WeatherApp = () => {
             onChange={(e) => setCity(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <button className="btn btn-primary" onClick={fetchWeather}>
+          <button className="btn btn-outline-primary" onClick={fetchWeather}>
             <img src={searchIcon} alt="search" style={{ width: '20px' }} />
           </button>
         </div>
 
+        {/* Error Message */}
         {error && <div className="alert alert-danger text-center">{error}</div>}
 
+        {/* Weather Display */}
         {weather && (
-          <>
-            <div className="text-center">
-              <img
-                src={iconMap[weather.weather[0].icon] || clearIcon}
-                alt="Weather Icon"
-                style={{ width: '100px' }}
-              />
-              <h2 className="display-4">{Math.round(weather.main.temp)}°C</h2>
-              <h5 className="text-muted">{weather.name}</h5>
-              <p className="text-capitalize">
-                {weather.weather[0].description}
-              </p>
-            </div>
+          <div className="text-center">
+            <img
+              src={iconMap[weather.weather[0].icon] || clearIcon}
+              alt="weather icon"
+              style={{ width: '100px' }}
+            />
+            <h2 className="display-4 fw-bold">{Math.round(weather.main.temp)}°C</h2>
+            <h5 className="text-muted">{weather.name}</h5>
+            <p className="text-capitalize">{weather.weather[0].description}</p>
 
             <hr />
 
-            <div className="row text-center">
-              <div className="col-6 d-flex align-items-center justify-content-center gap-2">
-                <img src={humidityIcon} alt="Humidity" style={{ width: '30px' }} />
-                <div>
-                  <div className="fw-bold">{weather.main.humidity}%</div>
-                  <small className="text-muted">Humidity</small>
-                </div>
+            <div className="row">
+              <div className="col-6 text-center">
+                <img src={humidityIcon} alt="humidity" style={{ width: '30px' }} />
+                <div className="fw-bold">{weather.main.humidity}%</div>
+                <small className="text-muted">Humidity</small>
               </div>
-              <div className="col-6 d-flex align-items-center justify-content-center gap-2">
-                <img src={windIcon} alt="Wind" style={{ width: '30px' }} />
-                <div>
-                  <div className="fw-bold">{Math.round(weather.wind.speed)} km/h</div>
-                  <small className="text-muted">Wind Speed</small>
-                </div>
+              <div className="col-6 text-center">
+                <img src={windIcon} alt="wind" style={{ width: '30px' }} />
+                <div className="fw-bold">{Math.round(weather.wind.speed)} km/h</div>
+                <small className="text-muted">Wind Speed</small>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
