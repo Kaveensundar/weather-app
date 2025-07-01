@@ -1,120 +1,116 @@
-import { useState } from 'react'
+import { useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-import searchIcon from '../pngs/search.png'
-import clearIcon from '../pngs/clear.png'
-import cloudIcon from '../pngs/cloud.png'
-import drizzleIcon from '../pngs/drizzle.png'
-import rainIcon from '../pngs/rain.png'
-import snowIcon from '../pngs/snow.png'
-import windIcon from '../pngs/wind.png'
-import humidityIcon from '../pngs/humidity.png'
+import searchIcon from '../pngs/search.png';
+import clearIcon from '../pngs/clear.png';
+import cloudIcon from '../pngs/cloud.png';
+import drizzleIcon from '../pngs/drizzle.png';
+import rainIcon from '../pngs/rain.png';
+import snowIcon from '../pngs/snow.png';
+import windIcon from '../pngs/wind.png';
+import humidityIcon from '../pngs/humidity.png';
 
+const iconMap = {
+  '01d': clearIcon,
+  '01n': clearIcon,
+  '02d': cloudIcon,
+  '02n': cloudIcon,
+  '03d': drizzleIcon,
+  '03n': drizzleIcon,
+  '09d': rainIcon,
+  '09n': rainIcon,
+  '10d': rainIcon,
+  '10n': rainIcon,
+  '13d': snowIcon,
+  '13n': snowIcon,
+};
 
+const WeatherApp = () => {
+  const [city, setCity] = useState('');
+  const [weather, setWeather] = useState(null);
+  const [error, setError] = useState(null);
+  const apiKey = '847c50ce76faa39c92195aa151a59730'; // move to env for production
 
-import './WeatherApp.css'
-const WeatherApp = ()=>{
-    
-    const [wicon,seticon] = useState("")
+  const fetchWeather = async () => {
+    if (!city.trim()) return;
 
-    let api_key = "847c50ce76faa39c92195aa151a59730"
-
-    const search = async ()=>{
-        const element = document.getElementsByClassName("cityInput")
-        if(element[0].value === "")
-        {
-            return 0 ;
-        }
-        else{
-        let url = `https://api.openweathermap.org/data/2.5/weather?q=${element[0].value}&units=Metric&appid=${api_key}`
-        
-        let response = await fetch(url)
-        let data = await response.json()
-        
-        const  humidity = document.getElementsByClassName("humidity_percent")
-        const  wind = document.getElementsByClassName("wind_speed")
-        const  temprature = document.getElementsByClassName("weather_temp")
-        const  location = document.getElementsByClassName("weather_location")
-
-        humidity[0].innerHTML = data.main.humidity+" %"
-        wind[0].innerHTML = Math.floor(data.wind.speed)+" km/h"
-        temprature[0].innerHTML = Math.floor(data.main.temp)+" °C"
-        location[0].innerHTML = data.name
-
-        if(data.weather[0].icon === "01d" || data.weather[0].icon === "01n"){
-            seticon(clearIcon)
-        }
-        else if(data.weather[0].icon === "02d" || data.weather[0].icon === "02n"){
-            seticon(cloudIcon)
-        }
-        else if(data.weather[0].icon === "03d" || data.weather[0].icon === "03n"){
-            seticon(drizzleIcon)
-        }
-        else if(data.weather[0].icon === "09d" || data.weather[0].icon === "09n"){
-            seticon(rainIcon)
-        }
-        else if(data.weather[0].icon === "10d" || data.weather[0].icon === "10n"){
-            seticon(rainIcon)
-        }
-        else if(data.weather[0].icon === "13d" || data.weather[0].icon === "13n"){
-            seticon(snowIcon)
-        }
-        else {
-            seticon(clearIcon)
-        }
-
+    setError(null);
+    try {
+      const res = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`
+      );
+      if (!res.ok) throw new Error('City not found');
+      const data = await res.json();
+      setWeather(data);
+    } catch (err) {
+      setError(err.message);
+      setWeather(null);
     }
-    
-    }
+  };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') fetchWeather();
+  };
 
-    return(
-        <div  className='container'>
-            <div className='topBar'>
-                <input type='text'  className='cityInput' placeholder='Search'/>
-                <div className='search_icon' onClick={()=>{search()}}>
-                   <img src={searchIcon} alt='searchIcon' />
-                </div>
-                <div className='weather_icon'>
-                    { <img src= {wicon} alt=''/>     }         
-                </div>
-                <div className='weather_temp'>0*C</div>
-                <div className='weather_location'>location</div>
-                
+  return (
+    <div className="container py-5 d-flex justify-content-center align-items-center min-vh-100 bg-light">
+      <div className="card shadow-lg p-4 w-100" style={{ maxWidth: '500px' }}>
+        <h3 className="text-center mb-4">🌤️ Weather App</h3>
 
+        <div className="input-group mb-4">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Enter city name"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <button className="btn btn-primary" onClick={fetchWeather}>
+            <img src={searchIcon} alt="search" style={{ width: '20px' }} />
+          </button>
+        </div>
 
-                <div className='data_container'>
-                    <div className='element'>
-                        <img src={humidityIcon} className='icon'alt='humidityIcon'/>
-                        <div className='data'>
-                            <div className='humidity_percent'>0%</div>
-                            <div className='text'>Humidity</div>
-                        </div>
-                    </div>
-                    <div className='element'>
-                        <img src={windIcon} className='icon' alt=''/>
-                        <div className='data'>
-                            <div className='wind_speed'>0 km/h</div>
-                            <div className='text'>Wind Speed</div>
-                        </div>
-                    </div>
+        {error && <div className="alert alert-danger text-center">{error}</div>}
 
-
-                </div>
-
-
-
-
+        {weather && (
+          <>
+            <div className="text-center">
+              <img
+                src={iconMap[weather.weather[0].icon] || clearIcon}
+                alt="Weather Icon"
+                style={{ width: '100px' }}
+              />
+              <h2 className="display-4">{Math.round(weather.main.temp)}°C</h2>
+              <h5 className="text-muted">{weather.name}</h5>
+              <p className="text-capitalize">
+                {weather.weather[0].description}
+              </p>
             </div>
 
-        </div>
-        )
-}
+            <hr />
 
+            <div className="row text-center">
+              <div className="col-6 d-flex align-items-center justify-content-center gap-2">
+                <img src={humidityIcon} alt="Humidity" style={{ width: '30px' }} />
+                <div>
+                  <div className="fw-bold">{weather.main.humidity}%</div>
+                  <small className="text-muted">Humidity</small>
+                </div>
+              </div>
+              <div className="col-6 d-flex align-items-center justify-content-center gap-2">
+                <img src={windIcon} alt="Wind" style={{ width: '30px' }} />
+                <div>
+                  <div className="fw-bold">{Math.round(weather.wind.speed)} km/h</div>
+                  <small className="text-muted">Wind Speed</small>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 
-export default WeatherApp
-
-
-
-
-
-
+export default WeatherApp;
